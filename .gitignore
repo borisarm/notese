@@ -1,2 +1,5 @@
 build
 vcpkg_installed
+.vscode
+*.log
+*.obj   

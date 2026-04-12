@@ -2,13 +2,11 @@
 #include <string>
 #include <chrono>
 #include <compare>
-#include "NoteId.hpp"
+#include "NoteIdConcept.hpp"
 
-namespace notese {
+namespace notes {
 
-    // -----------------------------
-    // Note entity (domain model)
-    // -----------------------------
+    template <NoteIdConcept NoteId>
     class Note {
     public:
         using Clock = std::chrono::system_clock;
@@ -18,25 +16,34 @@ namespace notese {
              std::string title,
              std::string content,
              TimePoint created_at,
-             TimePoint updated_at);
+             TimePoint updated_at)
+            : id_(std::move(id)),
+              title_(std::move(title)),
+              content_(std::move(content)),
+              created_at_(created_at),
+              updated_at_(updated_at) {}
 
-        // Factory for new notes
-        static Note CreateNew(NoteId id, std::string title, std::string content);
+        static Note CreateNew(NoteId id, std::string title, std::string content) {
+            auto now = Clock::now();
+            return Note(std::move(id), std::move(title), std::move(content), now, now);
+        }
 
-        // Accessors
+        // Getters
         const NoteId& id() const noexcept { return id_; }
         const std::string& title() const noexcept { return title_; }
         const std::string& content() const noexcept { return content_; }
         TimePoint created_at() const noexcept { return created_at_; }
         TimePoint updated_at() const noexcept { return updated_at_; }
 
-        // Domain behavior: editing content
-        Note with_updated_content(std::string new_content) const;
+        // Modificaciones funcionales
+        Note with_updated_content(std::string new_content) const {
+            return Note(id_, title_, std::move(new_content), created_at_, Clock::now());
+        }
 
-        // Domain behavior: editing title
-        Note with_updated_title(std::string new_title) const;
+        Note with_updated_title(std::string new_title) const {
+            return Note(id_, std::move(new_title), content_, created_at_, Clock::now());
+        }
 
-        // Comparison (value semantics)
         auto operator<=>(const Note&) const = default;
 
     private:
