@@ -9,6 +9,7 @@ namespace notes {
     template <NoteIdConcept NoteId>
     class Note {
     public:
+        using IdType = NoteId;
         using Clock = std::chrono::system_clock;
         using TimePoint = std::chrono::time_point<Clock>;
 
