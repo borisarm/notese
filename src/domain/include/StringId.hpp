@@ -1,5 +1,6 @@
 #include <string>
 #include <compare>
+#include <functional>
 
 namespace notes {
 
@@ -15,3 +16,10 @@ namespace notes {
     };
 
 }
+
+template<>
+struct std::hash<notes::StringId> {
+    std::size_t operator()(const notes::StringId& id) const noexcept {
+        return std::hash<std::string>{}(id.value);
+    }
+};

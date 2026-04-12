@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <optional>
+#include <vector>
 
 template <typename Note>
 class InMemoryNoteRepository {
