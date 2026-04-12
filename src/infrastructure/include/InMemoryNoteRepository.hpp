@@ -8,7 +8,7 @@ public:
     using Id = typename Note::IdType;
 
     void save(const Note& note) {
-        notes_[note.id()] = note;
+        notes_.insert_or_assign(note.id(), note);
     }
 
     void remove(const Id& id) {
