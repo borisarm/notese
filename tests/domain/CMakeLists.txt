@@ -1,11 +1,13 @@
-add_executable(notese_domain_tests
-	NoteTests.cpp
-)
+add_executable(domain_tests
+	NoteCreateNewInitializesFieldsAndTimestampsTests.cpp
+ 	NoteDefaultComparisonTreatsEqualValuesAsEqualTests.cpp 
+	NoteWithUpdatedContentPreservesIdentityAndCreatedAtTests.cpp 
+	NoteWithUpdatedTitlePreservesIdentityAndCreatedAtTests.cpp 
+	StringIdToStringReturnsUnderlyingValueTests.cpp)
 
-target_link_libraries(notese_domain_tests
-	PRIVATE
-		notese_domain
-		GTest::gtest_main
-)
+target_include_directories(domain_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/domain/include)
 
-add_test(NAME domain_tests COMMAND notese_domain_tests)
+target_link_libraries(domain_tests PRIVATE GTest::gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(domain_tests)
