@@ -7,14 +7,14 @@
 #include <vector>
 #include "Note.hpp"
 #include "StringId.hpp"
-#include "MarkdownNoteRepository.hpp"
+#include "NoteRepositoryConcept.hpp"
 
 namespace notes::tui {
 
 using NoteType = Note<StringId>;
-using Repo = MarkdownNoteRepository<NoteType>;
 
-inline int run(Repo& repo) {
+template <NoteRepositoryConcept<NoteType> Repo>
+int run(Repo& repo) {
     using namespace ftxui;
 
     auto notes = repo.list();

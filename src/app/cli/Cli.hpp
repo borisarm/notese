@@ -4,12 +4,11 @@
 #include <vector>
 #include "Note.hpp"
 #include "StringId.hpp"
-#include "MarkdownNoteRepository.hpp"
+#include "NoteRepositoryConcept.hpp"
 
 namespace notes::cli {
 
 using NoteType = Note<StringId>;
-using Repo = MarkdownNoteRepository<NoteType>;
 
 #ifdef _WIN32
 constexpr const char* eof_hint = "Enter content (Ctrl+Z then Enter to finish):";
@@ -27,7 +26,8 @@ inline void print_usage(const char* program) {
               << "  " << program << " remove <id>           Remove a note\n";
 }
 
-inline int run(Repo& repo, const std::vector<std::string>& args) {
+template <NoteRepositoryConcept<NoteType> Repo>
+int run(Repo& repo, const std::vector<std::string>& args) {
     if (args.empty()) {
         return -1; // Signal to caller: no args, launch TUI
     }
