@@ -5,7 +5,9 @@
 
 #include "InMemoryNoteRepository.hpp"
 #include "MarkdownNoteRepository.hpp"
+#include "MarkdownReminderRepository.hpp"
 #include "Note.hpp"
+#include "Reminder.hpp"
 #include "StringId.hpp"
 #include "IntegerId.hpp"
 
@@ -18,6 +20,10 @@ using MarkdownRepo = MarkdownNoteRepository<NoteType>;
 using IntNoteType = Note<IntegerId>;
 using IntInMemoryRepo = InMemoryNoteRepository<IntNoteType>;
 using IntMarkdownRepo = MarkdownNoteRepository<IntNoteType>;
+
+using IntReminderType = Reminder<IntegerId>;
+using IntReminderInMemoryRepo = InMemoryNoteRepository<IntReminderType>;
+using IntReminderMarkdownRepo = MarkdownReminderRepository<IntReminderType>;
 
 class TempDir {
 public:

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Note.hpp"
+#include "Reminder.hpp"
 #include "NoteIdConcept.hpp"
 #include "NoteRepositoryConcept.hpp"
 #include "StringId.hpp"
@@ -14,6 +15,7 @@ namespace notes::tests {
 
 using NoteType = Note<StringId>;
 using IntNoteType = Note<IntegerId>;
+using IntReminderType = Reminder<IntegerId>;
 
 struct InMemoryRepoMock {
     void save(const NoteType&) {}
