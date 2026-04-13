@@ -8,10 +8,12 @@
 #include "NoteIdConcept.hpp"
 #include "NoteRepositoryConcept.hpp"
 #include "StringId.hpp"
+#include "IntegerId.hpp"
 
 namespace notes::tests {
 
 using NoteType = Note<StringId>;
+using IntNoteType = Note<IntegerId>;
 
 struct InMemoryRepoMock {
     void save(const NoteType&) {}
@@ -21,6 +23,7 @@ struct InMemoryRepoMock {
 };
 
 static_assert(NoteIdConcept<StringId>);
+static_assert(NoteIdConcept<IntegerId>);
 static_assert(NoteRepositoryConcept<InMemoryRepoMock, NoteType>);
 
 } // namespace notes::tests

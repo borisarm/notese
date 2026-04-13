@@ -73,6 +73,22 @@ namespace notes {
             return notes;
         }
 
+        // -----------------------------------------
+        // next_id()
+        // -----------------------------------------
+        Id next_id() const {
+            int max_id = 0;
+            for (auto& entry : std::filesystem::directory_iterator(dir_)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".md") {
+                    try {
+                        int id = std::stoi(entry.path().stem().string());
+                        if (id > max_id) max_id = id;
+                    } catch (...) {}
+                }
+            }
+            return Id{max_id + 1};
+        }
+
     private:
         std::filesystem::path dir_;
 

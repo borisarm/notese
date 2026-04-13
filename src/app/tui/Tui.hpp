@@ -6,12 +6,12 @@
 #include <string>
 #include <vector>
 #include "Note.hpp"
-#include "StringId.hpp"
+#include "IntegerId.hpp"
 #include "NoteRepositoryConcept.hpp"
 
 namespace notes::tui {
 
-using NoteType = Note<StringId>;
+using NoteType = Note<IntegerId>;
 
 template <NoteRepositoryConcept<NoteType> Repo>
 int run(Repo& repo) {

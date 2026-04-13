@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 #include "Note.hpp"
-#include "StringId.hpp"
+#include "IntegerId.hpp"
 #include "NoteRepositoryConcept.hpp"
 
 namespace notes::cli {
 
-using NoteType = Note<StringId>;
+using NoteType = Note<IntegerId>;
 
 #ifdef _WIN32
 constexpr const char* eof_hint = "Enter content (Ctrl+Z then Enter to finish):";
@@ -21,7 +21,7 @@ inline void print_usage(const char* program) {
               << "  " << program << "                      Launch TUI\n"
               << "  " << program << " list                  List all notes\n"
               << "  " << program << " show <id>             Show a note\n"
-              << "  " << program << " add <id> <title>      Add a new note (reads content from stdin)\n"
+              << "  " << program << " add <title>           Add a new note (reads content from stdin)\n"
               << "  " << program << " edit <id> <title>     Update a note (reads content from stdin)\n"
               << "  " << program << " remove <id>           Remove a note\n";
 }
@@ -46,7 +46,7 @@ int run(Repo& repo, const std::vector<std::string>& args) {
             std::cerr << "Error: 'show' requires an id\n";
             return 1;
         }
-        auto note = repo.get(StringId{args[1]});
+        auto note = repo.get(IntegerId{std::stoi(args[1])});
         if (!note) {
             std::cerr << "Error: note '" << args[1] << "' not found\n";
             return 1;
@@ -60,16 +60,17 @@ int run(Repo& repo, const std::vector<std::string>& args) {
     }
 
     if (cmd == "add") {
-        if (args.size() < 3) {
-            std::cerr << "Error: 'add' requires <id> and <title>\n";
+        if (args.size() < 2) {
+            std::cerr << "Error: 'add' requires <title>\n";
             return 1;
         }
         std::cerr << eof_hint << "\n";
         std::string content((std::istreambuf_iterator<char>(std::cin)),
                              std::istreambuf_iterator<char>());
-        auto note = NoteType::CreateNew(StringId{args[1]}, args[2], std::move(content));
+        auto id = repo.next_id();
+        auto note = NoteType::CreateNew(id, args[1], std::move(content));
         repo.save(note);
-        std::cout << "Added note '" << args[1] << "'\n";
+        std::cout << "Added note '" << id.to_string() << "'\n";
         return 0;
     }
 
@@ -78,7 +79,7 @@ int run(Repo& repo, const std::vector<std::string>& args) {
             std::cerr << "Error: 'edit' requires <id> and <title>\n";
             return 1;
         }
-        auto existing = repo.get(StringId{args[1]});
+        auto existing = repo.get(IntegerId{std::stoi(args[1])});
         if (!existing) {
             std::cerr << "Error: note '" << args[1] << "' not found\n";
             return 1;
@@ -98,7 +99,7 @@ int run(Repo& repo, const std::vector<std::string>& args) {
             std::cerr << "Error: 'remove' requires an id\n";
             return 1;
         }
-        repo.remove(StringId{args[1]});
+        repo.remove(IntegerId{std::stoi(args[1])});
         std::cout << "Removed note '" << args[1] << "'\n";
         return 0;
     }

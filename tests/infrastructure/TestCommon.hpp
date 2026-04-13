@@ -7,12 +7,17 @@
 #include "MarkdownNoteRepository.hpp"
 #include "Note.hpp"
 #include "StringId.hpp"
+#include "IntegerId.hpp"
 
 namespace notes::tests {
 
 using NoteType = Note<StringId>;
 using InMemoryRepo = InMemoryNoteRepository<NoteType>;
 using MarkdownRepo = MarkdownNoteRepository<NoteType>;
+
+using IntNoteType = Note<IntegerId>;
+using IntInMemoryRepo = InMemoryNoteRepository<IntNoteType>;
+using IntMarkdownRepo = MarkdownNoteRepository<IntNoteType>;
 
 class TempDir {
 public:

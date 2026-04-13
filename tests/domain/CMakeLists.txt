@@ -1,5 +1,6 @@
 add_executable(domain_tests
 	NoteCreateNewInitializesFieldsAndTimestampsTests.cpp
+	NoteCreateNewWithIntegerIdInitializesFieldsAndTimestampsTests.cpp
 	NoteDefaultComparisonTreatsEqualValuesAsEqualTests.cpp
 	NoteDefaultComparisonTreatsDifferentValuesAsNotEqualTests.cpp
 	NoteWithUpdatedContentPreservesIdentityAndCreatedAtTests.cpp
@@ -7,7 +8,12 @@ add_executable(domain_tests
 	StringIdToStringReturnsUnderlyingValueTests.cpp
 	StringIdEqualityComparesUnderlyingValueTests.cpp
 	StringIdHashProducesSameValueForEqualIdsTests.cpp
-	StringIdOrderingComparesLexicographicallyTests.cpp)
+	StringIdOrderingComparesLexicographicallyTests.cpp
+	IntegerIdToStringReturnsUnderlyingValueTests.cpp
+	IntegerIdEqualityComparesUnderlyingValueTests.cpp
+	IntegerIdHashProducesSameValueForEqualIdsTests.cpp
+	IntegerIdOrderingComparesNumericallyTests.cpp
+	IntegerIdFromStringParsesValueTests.cpp)
 
 target_include_directories(domain_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/domain/include)
 
