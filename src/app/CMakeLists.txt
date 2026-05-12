@@ -10,3 +10,16 @@ target_link_libraries(notese PRIVATE
     ftxui::dom
     ftxui::screen
     ftxui::component)
+
+# Release-only size optimizations: LTO + -Os + dead-code stripping + symbol strip.
+include(CheckIPOSupported)
+check_ipo_supported(RESULT _notese_ipo_supported OUTPUT _notese_ipo_error)
+if(_notese_ipo_supported)
+    set_property(TARGET notese PROPERTY
+        INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+endif()
+
+target_compile_options(notese PRIVATE
+    $<$<CONFIG:Release>:-Os -ffunction-sections -fdata-sections>)
+target_link_options(notese PRIVATE
+    $<$<CONFIG:Release>:-Wl,--gc-sections -s>)
