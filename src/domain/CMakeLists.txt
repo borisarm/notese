@@ -1,5 +1,3 @@
-add_library(notese_domain)
+add_library(notese_domain INTERFACE)
 
-target_sources(notese_domain PRIVATE src/Note.cpp)
-
-target_include_directories(notese_domain PUBLIC include)
+target_include_directories(notese_domain INTERFACE include)
