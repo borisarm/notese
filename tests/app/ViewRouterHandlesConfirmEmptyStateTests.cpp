@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../../src/app/tui/ViewRouter.hpp"
+#include "ViewRouter.hpp"
 
 namespace notes::tests {
 

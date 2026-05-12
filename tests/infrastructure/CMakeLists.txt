@@ -32,7 +32,10 @@ target_include_directories(infrastructure_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/src/infrastructure/include
 	${CMAKE_SOURCE_DIR}/src/domain/include)
 
-target_link_libraries(infrastructure_tests PRIVATE GTest::gtest_main)
+target_link_libraries(infrastructure_tests PRIVATE
+	notese_domain
+	notese_infrastructure
+	GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(infrastructure_tests)

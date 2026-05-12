@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../../src/app/tui/TuiState.hpp"
-#include "../../src/domain/include/IntegerId.hpp"
-#include "../../src/domain/include/Note.hpp"
+#include "TuiState.hpp"
+#include "IntegerId.hpp"
+#include "Note.hpp"
 
 namespace notes::tests {
 

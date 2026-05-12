@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include "../../src/app/tui/ReminderWorkflowService.hpp"
-#include "../../src/app/tui/TuiState.hpp"
-#include "../../src/domain/include/IntegerId.hpp"
-#include "../../src/domain/include/Reminder.hpp"
-#include "../../src/infrastructure/include/InMemoryNoteRepository.hpp"
+#include "ReminderWorkflowService.hpp"
+#include "TuiState.hpp"
+#include "IntegerId.hpp"
+#include "Reminder.hpp"
+#include "InMemoryNoteRepository.hpp"
 
 namespace notes::tests {
 

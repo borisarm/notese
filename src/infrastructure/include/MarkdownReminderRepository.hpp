@@ -1,9 +1,9 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 #include <optional>
 #include <vector>
+#include "FileWriter.hpp"
 #include "FrontMatter.hpp"
 #include "Iso8601.hpp"
 #include "NextIdAllocator.hpp"
@@ -27,7 +27,7 @@ namespace notes {
 
         void save(const Reminder& reminder) {
             auto path = file_path(reminder.id());
-            std::ofstream out(path);
+            auto out = infra::open_for_write(path);
 
             out << "---\n";
             out << "id: " << reminder.id().to_string() << "\n";

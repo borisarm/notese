@@ -12,6 +12,8 @@ target_include_directories(app_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/src/infrastructure/include)
 
 target_link_libraries(app_tests PRIVATE
+	notese_domain
+	notese_infrastructure
 	GTest::gtest_main
 	ftxui::dom
 	ftxui::screen

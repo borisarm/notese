@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "../../src/app/tui/NoteWorkflowService.hpp"
-#include "../../src/app/tui/TuiState.hpp"
-#include "../../src/domain/include/IntegerId.hpp"
-#include "../../src/domain/include/Note.hpp"
-#include "../../src/infrastructure/include/InMemoryNoteRepository.hpp"
+#include "NoteWorkflowService.hpp"
+#include "TuiState.hpp"
+#include "IntegerId.hpp"
+#include "Note.hpp"
+#include "InMemoryNoteRepository.hpp"
 
 namespace notes::tests {
 

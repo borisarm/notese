@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../../src/app/tui/ActionExecutor.hpp"
-#include "../../src/domain/include/IntegerId.hpp"
-#include "../../src/domain/include/Note.hpp"
+#include "ActionExecutor.hpp"
+#include "IntegerId.hpp"
+#include "Note.hpp"
 
 namespace notes::tests {
 

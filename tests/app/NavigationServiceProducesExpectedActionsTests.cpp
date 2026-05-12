@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
 #include <variant>
-#include "../../src/app/tui/NavigationService.hpp"
-#include "../../src/app/tui/TuiState.hpp"
-#include "../../src/domain/include/IntegerId.hpp"
-#include "../../src/domain/include/Note.hpp"
+#include "NavigationService.hpp"
+#include "TuiState.hpp"
+#include "IntegerId.hpp"
+#include "Note.hpp"
 
 namespace notes::tests {
 

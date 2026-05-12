@@ -1,6 +1,4 @@
-add_library(notese_infrastructure)
+add_library(notese_infrastructure INTERFACE)
 
-target_sources(notese_infrastructure PRIVATE src/infrastructure.cpp)
-
-target_include_directories(notese_infrastructure PRIVATE include ../domain/include)
-target_link_libraries(notese_infrastructure PRIVATE notese_domain)
+target_include_directories(notese_infrastructure INTERFACE include)
+target_link_libraries(notese_infrastructure INTERFACE notese_domain)
