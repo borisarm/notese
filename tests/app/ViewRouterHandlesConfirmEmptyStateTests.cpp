@@ -4,7 +4,7 @@
 
 namespace notes::tests {
 
-TEST(ViewRouterTests, EmptyNoteConfirmReturnsToBrowse) {
+TEST(ViewRouterTests, EmptyNoteConfirmDoesNotMutateMode) {
     notes::tui::TuiState state;
     state.mode = notes::tui::Mode::ConfirmDeleteNote;
 
@@ -23,10 +23,10 @@ TEST(ViewRouterTests, EmptyNoteConfirmReturnsToBrowse) {
     notes::tui::ViewRouter router;
     (void)router.render(state, input_title, input_content, input_date, note_menu, reminder_menu);
 
-    EXPECT_EQ(state.mode, notes::tui::Mode::Browse);
+    EXPECT_EQ(state.mode, notes::tui::Mode::ConfirmDeleteNote);
 }
 
-TEST(ViewRouterTests, EmptyReminderConfirmReturnsToBrowse) {
+TEST(ViewRouterTests, EmptyReminderConfirmDoesNotMutateMode) {
     notes::tui::TuiState state;
     state.mode = notes::tui::Mode::ConfirmDeleteReminder;
 
@@ -45,7 +45,7 @@ TEST(ViewRouterTests, EmptyReminderConfirmReturnsToBrowse) {
     notes::tui::ViewRouter router;
     (void)router.render(state, input_title, input_content, input_date, note_menu, reminder_menu);
 
-    EXPECT_EQ(state.mode, notes::tui::Mode::Browse);
+    EXPECT_EQ(state.mode, notes::tui::Mode::ConfirmDeleteReminder);
 }
 
 } // namespace notes::tests

@@ -20,6 +20,15 @@ struct TuiState {
     std::vector<std::string> note_entries;
     std::vector<ReminderType> reminders;
     std::vector<std::string> reminder_entries;
+
+    void enforce_invariants() {
+        if (mode == Mode::ConfirmDeleteNote && notes.empty()) {
+            mode = Mode::Browse;
+        }
+        if (mode == Mode::ConfirmDeleteReminder && reminders.empty()) {
+            mode = Mode::Browse;
+        }
+    }
 };
 
 } // namespace notes::tui

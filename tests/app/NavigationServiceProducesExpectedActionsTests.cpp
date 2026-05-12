@@ -20,7 +20,7 @@ TEST(NavigationServiceTests, ReturnOnAddNoteProducesSaveNoteFormAction) {
     EXPECT_TRUE(std::holds_alternative<notes::tui::SaveNoteFormAction>(decision.action));
 }
 
-TEST(NavigationServiceTests, TabInBrowseChangesTabAndReturnsNoAction) {
+TEST(NavigationServiceTests, TabInBrowseProducesSwitchTabActionWithoutMutatingState) {
     notes::tui::NavigationService service;
     notes::tui::TuiState state;
     state.mode = notes::tui::Mode::Browse;
@@ -29,11 +29,11 @@ TEST(NavigationServiceTests, TabInBrowseChangesTabAndReturnsNoAction) {
     const auto decision = service.handle_event(ftxui::Event::Tab, state, false);
 
     EXPECT_TRUE(decision.handled);
-    EXPECT_EQ(state.tab, 1);
-    EXPECT_TRUE(std::holds_alternative<notes::tui::NoAction>(decision.action));
+    EXPECT_EQ(state.tab, 0);
+    EXPECT_TRUE(std::holds_alternative<notes::tui::SwitchTabAction>(decision.action));
 }
 
-TEST(NavigationServiceTests, DeleteInBrowseWithNotesMovesToConfirmDelete) {
+TEST(NavigationServiceTests, DeleteInBrowseWithNotesProducesEnterConfirmDeleteNoteActionWithoutMutatingState) {
     notes::tui::NavigationService service;
     notes::tui::TuiState state;
     state.mode = notes::tui::Mode::Browse;
@@ -43,8 +43,8 @@ TEST(NavigationServiceTests, DeleteInBrowseWithNotesMovesToConfirmDelete) {
     const auto decision = service.handle_event(ftxui::Event::Character('d'), state, false);
 
     EXPECT_TRUE(decision.handled);
-    EXPECT_EQ(state.mode, notes::tui::Mode::ConfirmDeleteNote);
-    EXPECT_TRUE(std::holds_alternative<notes::tui::NoAction>(decision.action));
+    EXPECT_EQ(state.mode, notes::tui::Mode::Browse);
+    EXPECT_TRUE(std::holds_alternative<notes::tui::EnterConfirmDeleteNoteAction>(decision.action));
 }
 
 } // namespace notes::tests

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <format>
 #include <ftxui/component/event.hpp>
 #include <variant>
 #include "TuiState.hpp"
@@ -16,6 +14,14 @@ struct DeleteSelectedNoteAction {};
 struct DeleteSelectedReminderAction {};
 struct PassToNoteMenuAction {};
 struct PassToReminderMenuAction {};
+struct EnterBrowseModeAction {};
+struct SwitchTabAction {};
+struct BeginAddNoteAction {};
+struct BeginAddReminderAction {};
+struct BeginEditNoteAction {};
+struct BeginEditReminderAction {};
+struct EnterConfirmDeleteNoteAction {};
+struct EnterConfirmDeleteReminderAction {};
 
 using NavigationAction = std::variant<
     NoAction,
@@ -25,7 +31,15 @@ using NavigationAction = std::variant<
     DeleteSelectedNoteAction,
     DeleteSelectedReminderAction,
     PassToNoteMenuAction,
-    PassToReminderMenuAction>;
+    PassToReminderMenuAction,
+    EnterBrowseModeAction,
+    SwitchTabAction,
+    BeginAddNoteAction,
+    BeginAddReminderAction,
+    BeginEditNoteAction,
+    BeginEditReminderAction,
+    EnterConfirmDeleteNoteAction,
+    EnterConfirmDeleteReminderAction>;
 
 struct NavigationDecision {
     bool handled = false;
@@ -34,7 +48,7 @@ struct NavigationDecision {
 
 class NavigationService {
 public:
-    NavigationDecision handle_event(const ftxui::Event& event, TuiState& state, bool content_focused) const {
+    NavigationDecision handle_event(const ftxui::Event& event, const TuiState& state, bool content_focused) const {
         if (state.mode == Mode::AddNote || state.mode == Mode::EditNote) {
             return handle_note_form_event(event, state, content_focused);
         }
@@ -42,10 +56,10 @@ public:
             return handle_reminder_form_event(event, state, content_focused);
         }
         if (state.mode == Mode::ConfirmDeleteNote) {
-            return handle_note_delete_event(event, state);
+            return handle_note_delete_event(event);
         }
         if (state.mode == Mode::ConfirmDeleteReminder) {
-            return handle_reminder_delete_event(event, state);
+            return handle_reminder_delete_event(event);
         }
         return handle_browse_event(event, state);
     }
@@ -60,10 +74,9 @@ private:
         return NavigationDecision{false, NavigationAction{NoAction{}}};
     }
 
-    static NavigationDecision handle_note_form_event(const ftxui::Event& event, TuiState& state, bool content_focused) {
+    static NavigationDecision handle_note_form_event(const ftxui::Event& event, const TuiState& state, bool content_focused) {
         if (event == ftxui::Event::Escape) {
-            state.mode = Mode::Browse;
-            return make_handled(NoAction{});
+            return make_handled(EnterBrowseModeAction{});
         }
 
         if (event != ftxui::Event::Return) {
@@ -81,10 +94,9 @@ private:
         return make_handled(NoAction{});
     }
 
-    static NavigationDecision handle_reminder_form_event(const ftxui::Event& event, TuiState& state, bool content_focused) {
+    static NavigationDecision handle_reminder_form_event(const ftxui::Event& event, const TuiState& state, bool content_focused) {
         if (event == ftxui::Event::Escape) {
-            state.mode = Mode::Browse;
-            return make_handled(NoAction{});
+            return make_handled(EnterBrowseModeAction{});
         }
 
         if (event != ftxui::Event::Return) {
@@ -102,71 +114,62 @@ private:
         return make_handled(NoAction{});
     }
 
-    static NavigationDecision handle_note_delete_event(const ftxui::Event& event, TuiState& state) {
+    static NavigationDecision handle_note_delete_event(const ftxui::Event& event) {
         if (event == ftxui::Event::Character('y')) {
             return make_handled(DeleteSelectedNoteAction{});
         }
 
         if (event == ftxui::Event::Character('n') || event == ftxui::Event::Escape) {
-            state.mode = Mode::Browse;
-            return make_handled(NoAction{});
+            return make_handled(EnterBrowseModeAction{});
         }
 
         return make_handled(NoAction{});
     }
 
-    static NavigationDecision handle_reminder_delete_event(const ftxui::Event& event, TuiState& state) {
+    static NavigationDecision handle_reminder_delete_event(const ftxui::Event& event) {
         if (event == ftxui::Event::Character('y')) {
             return make_handled(DeleteSelectedReminderAction{});
         }
 
         if (event == ftxui::Event::Character('n') || event == ftxui::Event::Escape) {
-            state.mode = Mode::Browse;
-            return make_handled(NoAction{});
+            return make_handled(EnterBrowseModeAction{});
         }
 
         return make_handled(NoAction{});
     }
 
-    static NavigationDecision handle_browse_event(const ftxui::Event& event, TuiState& state) {
+    static NavigationDecision handle_browse_event(const ftxui::Event& event, const TuiState& state) {
         if (event == ftxui::Event::Character('q') || event == ftxui::Event::Escape) {
             return make_handled(QuitAction{});
         }
 
         if (event == ftxui::Event::Tab) {
-            state.tab = (state.tab + 1) % 2;
-            return make_handled(NoAction{});
+            return make_handled(SwitchTabAction{});
         }
 
         if (event == ftxui::Event::Character('a')) {
-            state.form_title.clear();
-            state.form_content.clear();
-            state.form_date.clear();
-            state.mode = (state.tab == 0) ? Mode::AddNote : Mode::AddReminder;
-            return make_handled(NoAction{});
+            if (state.tab == 0) {
+                return make_handled(BeginAddNoteAction{});
+            }
+            return make_handled(BeginAddReminderAction{});
         }
 
         if (event == ftxui::Event::Character('e')) {
             if (state.tab == 0 && !state.notes.empty()) {
-                int idx = std::clamp(state.note_selected, 0, (int)state.notes.size() - 1);
-                state.form_title = state.notes[idx].title();
-                state.form_content = state.notes[idx].content();
-                state.mode = Mode::EditNote;
-            } else if (state.tab == 1 && !state.reminders.empty()) {
-                int idx = std::clamp(state.reminder_selected, 0, (int)state.reminders.size() - 1);
-                state.form_title = state.reminders[idx].title();
-                state.form_content = state.reminders[idx].content();
-                state.form_date = std::format("{:%F}", state.reminders[idx].remind_at());
-                state.mode = Mode::EditReminder;
+                return make_handled(BeginEditNoteAction{});
+            }
+            if (state.tab == 1 && !state.reminders.empty()) {
+                return make_handled(BeginEditReminderAction{});
             }
             return make_handled(NoAction{});
         }
 
         if (event == ftxui::Event::Character('d')) {
             if (state.tab == 0 && !state.notes.empty()) {
-                state.mode = Mode::ConfirmDeleteNote;
-            } else if (state.tab == 1 && !state.reminders.empty()) {
-                state.mode = Mode::ConfirmDeleteReminder;
+                return make_handled(EnterConfirmDeleteNoteAction{});
+            }
+            if (state.tab == 1 && !state.reminders.empty()) {
+                return make_handled(EnterConfirmDeleteReminderAction{});
             }
             return make_handled(NoAction{});
         }

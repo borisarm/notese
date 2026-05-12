@@ -11,7 +11,7 @@ namespace notes::tui {
 
 class ViewRouter {
 public:
-    ftxui::Element render(TuiState& state,
+    ftxui::Element render(const TuiState& state,
                           const ftxui::Component& input_title,
                           const ftxui::Component& input_content,
                           const ftxui::Component& input_date,
@@ -26,14 +26,12 @@ public:
                 return FormViews::render_reminder_form(state, input_title, input_content, input_date);
             case Mode::ConfirmDeleteNote:
                 if (state.notes.empty()) {
-                    state.mode = Mode::Browse;
-                    return ftxui::text("");
+                    return BrowseView::render(state, note_menu, reminder_menu);
                 }
                 return ConfirmView::render_note_delete(state);
             case Mode::ConfirmDeleteReminder:
                 if (state.reminders.empty()) {
-                    state.mode = Mode::Browse;
-                    return ftxui::text("");
+                    return BrowseView::render(state, note_menu, reminder_menu);
                 }
                 return ConfirmView::render_reminder_delete(state);
             case Mode::Browse:

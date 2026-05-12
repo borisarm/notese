@@ -3,7 +3,8 @@ add_executable(app_tests
 	ActionExecutorExecutesVariantActionsTests.cpp
 	NoteWorkflowServicePersistsAndRefreshesStateTests.cpp
 	ReminderWorkflowServicePersistsAndRefreshesStateTests.cpp
-	ViewRouterHandlesConfirmEmptyStateTests.cpp)
+	ViewRouterHandlesConfirmEmptyStateTests.cpp
+	TuiStateEnforceInvariantsTests.cpp)
 
 target_include_directories(app_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/src/app/tui
