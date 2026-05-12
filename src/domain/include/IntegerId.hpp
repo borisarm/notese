@@ -7,7 +7,7 @@ namespace notes {
 
     struct IntegerId {
 
-        IntegerId(int value) : value(value) {}
+        explicit IntegerId(int value) : value(value) {}
 
         explicit IntegerId(const std::string& s) : value(std::stoi(s)) {}
 

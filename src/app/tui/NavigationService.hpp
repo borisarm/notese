@@ -78,19 +78,15 @@ private:
         if (event == ftxui::Event::Escape) {
             return make_handled(EnterBrowseModeAction{});
         }
-
         if (event != ftxui::Event::Return) {
             return make_unhandled();
         }
-
         if (content_focused) {
             return make_unhandled();
         }
-
-        if (!state.form_title.empty()) {
+        if (!state.form.title.empty()) {
             return make_handled(SaveNoteFormAction{});
         }
-
         return make_handled(NoAction{});
     }
 
@@ -98,19 +94,15 @@ private:
         if (event == ftxui::Event::Escape) {
             return make_handled(EnterBrowseModeAction{});
         }
-
         if (event != ftxui::Event::Return) {
             return make_unhandled();
         }
-
         if (content_focused) {
             return make_unhandled();
         }
-
-        if (!state.form_title.empty() && !state.form_date.empty()) {
+        if (!state.form.title.empty() && !state.form.date.empty()) {
             return make_handled(SaveReminderFormAction{});
         }
-
         return make_handled(NoAction{});
     }
 
@@ -118,11 +110,9 @@ private:
         if (event == ftxui::Event::Character('y')) {
             return make_handled(DeleteSelectedNoteAction{});
         }
-
         if (event == ftxui::Event::Character('n') || event == ftxui::Event::Escape) {
             return make_handled(EnterBrowseModeAction{});
         }
-
         return make_handled(NoAction{});
     }
 
@@ -130,11 +120,9 @@ private:
         if (event == ftxui::Event::Character('y')) {
             return make_handled(DeleteSelectedReminderAction{});
         }
-
         if (event == ftxui::Event::Character('n') || event == ftxui::Event::Escape) {
             return make_handled(EnterBrowseModeAction{});
         }
-
         return make_handled(NoAction{});
     }
 
@@ -142,42 +130,36 @@ private:
         if (event == ftxui::Event::Character('q') || event == ftxui::Event::Escape) {
             return make_handled(QuitAction{});
         }
-
         if (event == ftxui::Event::Tab) {
             return make_handled(SwitchTabAction{});
         }
-
         if (event == ftxui::Event::Character('a')) {
-            if (state.tab == 0) {
+            if (state.selection.tab == 0) {
                 return make_handled(BeginAddNoteAction{});
             }
             return make_handled(BeginAddReminderAction{});
         }
-
         if (event == ftxui::Event::Character('e')) {
-            if (state.tab == 0 && !state.notes.empty()) {
+            if (state.selection.tab == 0 && !state.notes.empty()) {
                 return make_handled(BeginEditNoteAction{});
             }
-            if (state.tab == 1 && !state.reminders.empty()) {
+            if (state.selection.tab == 1 && !state.reminders.empty()) {
                 return make_handled(BeginEditReminderAction{});
             }
             return make_handled(NoAction{});
         }
-
         if (event == ftxui::Event::Character('d')) {
-            if (state.tab == 0 && !state.notes.empty()) {
+            if (state.selection.tab == 0 && !state.notes.empty()) {
                 return make_handled(EnterConfirmDeleteNoteAction{});
             }
-            if (state.tab == 1 && !state.reminders.empty()) {
+            if (state.selection.tab == 1 && !state.reminders.empty()) {
                 return make_handled(EnterConfirmDeleteReminderAction{});
             }
             return make_handled(NoAction{});
         }
-
-        if (state.tab == 0) {
+        if (state.selection.tab == 0) {
             return make_handled(PassToNoteMenuAction{});
         }
-
         return make_handled(PassToReminderMenuAction{});
     }
 };

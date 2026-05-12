@@ -28,9 +28,9 @@ public:
         auto preview = vbox({
             text("Preview") | bold | center,
             separator(),
-            text(state.form_title.empty() ? "(untitled)" : state.form_title) | bold,
+            text(state.form.title.empty() ? "(untitled)" : state.form.title) | bold,
             separator(),
-            render_markdown_preview(state.form_content) | flex,
+            render_markdown_preview(state.form.content) | flex,
         }) | border | flex;
 
         return hbox({editor, separator(), preview});
@@ -57,10 +57,10 @@ public:
         auto preview = vbox({
             text("Preview") | bold | center,
             separator(),
-            text(state.form_title.empty() ? "(untitled)" : state.form_title) | bold,
-            text(state.form_date.empty() ? "(no date)" : ("date: " + state.form_date)) | dim,
+            text(state.form.title.empty() ? "(untitled)" : state.form.title) | bold,
+            text(state.form.date.empty() ? "(no date)" : ("date: " + state.form.date)) | dim,
             separator(),
-            render_markdown_preview(state.form_content) | flex,
+            render_markdown_preview(state.form.content) | flex,
         }) | border | flex;
 
         return hbox({editor, separator(), preview});

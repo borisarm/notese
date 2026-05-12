@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include "FileWriter.hpp"
 #include "NoteRepositoryConcept.hpp"
 #include "TuiState.hpp"
 
@@ -23,36 +24,46 @@ public:
             state.note_entries.push_back(note.id().to_string() + "  " + note.title());
         }
 
-        if (state.note_selected >= (int)state.notes.size()) {
-            state.note_selected = std::max(0, (int)state.notes.size() - 1);
+        if (state.selection.note_selected >= (int)state.notes.size()) {
+            state.selection.note_selected = std::max(0, (int)state.notes.size() - 1);
         }
     }
 
     void save_form(TuiState& state) {
-        if (state.mode == Mode::AddNote) {
-            auto id = note_repo_.next_id();
-            auto note = NoteType::CreateNew(id, state.form_title, state.form_content);
-            note_repo_.save(note);
-        } else if (!state.notes.empty()) {
-            int idx = std::clamp(state.note_selected, 0, (int)state.notes.size() - 1);
-            auto updated = state.notes[idx]
-                .with_updated_title(state.form_title)
-                .with_updated_content(state.form_content);
-            note_repo_.save(updated);
-        }
+        try {
+            if (state.mode == Mode::AddNote) {
+                auto id = note_repo_.next_id();
+                auto note = NoteType::CreateNew(id, state.form.title, state.form.content);
+                note_repo_.save(note);
+            } else if (!state.notes.empty()) {
+                int idx = std::clamp(state.selection.note_selected, 0, (int)state.notes.size() - 1);
+                auto updated = state.notes[idx]
+                    .with_updated_title(state.form.title)
+                    .with_updated_content(state.form.content);
+                note_repo_.save(updated);
+            }
 
-        refresh(state);
-        state.mode = Mode::Browse;
+            refresh(state);
+            state.mode = Mode::Browse;
+            state.status_message.clear();
+        } catch (const infra::FileWriteError& error) {
+            state.status_message = error.what();
+        }
     }
 
     void delete_selected(TuiState& state) {
-        if (!state.notes.empty()) {
-            int idx = std::clamp(state.note_selected, 0, (int)state.notes.size() - 1);
-            note_repo_.remove(state.notes[idx].id());
-        }
+        try {
+            if (!state.notes.empty()) {
+                int idx = std::clamp(state.selection.note_selected, 0, (int)state.notes.size() - 1);
+                note_repo_.remove(state.notes[idx].id());
+            }
 
-        refresh(state);
-        state.mode = Mode::Browse;
+            refresh(state);
+            state.mode = Mode::Browse;
+            state.status_message.clear();
+        } catch (const infra::FileWriteError& error) {
+            state.status_message = error.what();
+        }
     }
 
 private:

@@ -18,9 +18,9 @@ TEST(ReminderWorkflowServiceTests, SaveFormInAddModePersistsAndReturnsToBrowse) 
     notes::tui::TuiState state;
 
     state.mode = notes::tui::Mode::AddReminder;
-    state.form_title = "Pay rent";
-    state.form_content = "Tomorrow";
-    state.form_date = "2026-05-20";
+    state.form.title = "Pay rent";
+    state.form.content = "Tomorrow";
+    state.form.date = "2026-05-20";
 
     service.save_form(state);
 
@@ -40,7 +40,7 @@ TEST(ReminderWorkflowServiceTests, DeleteSelectedRemovesCurrentReminder) {
     repo.save(IntReminderType::CreateNew(notes::IntegerId{2}, "B", "B", ts));
 
     service.refresh(state);
-    state.reminder_selected = 0;
+    state.selection.reminder_selected = 0;
     state.mode = notes::tui::Mode::ConfirmDeleteReminder;
 
     service.delete_selected(state);

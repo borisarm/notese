@@ -17,8 +17,8 @@ TEST(NoteWorkflowServiceTests, SaveFormInAddModePersistsAndReturnsToBrowse) {
     notes::tui::TuiState state;
 
     state.mode = notes::tui::Mode::AddNote;
-    state.form_title = "Title";
-    state.form_content = "Body";
+    state.form.title = "Title";
+    state.form.content = "Body";
 
     service.save_form(state);
 
@@ -38,7 +38,7 @@ TEST(NoteWorkflowServiceTests, DeleteSelectedRemovesCurrentNote) {
     repo.save(IntNoteType::CreateNew(notes::IntegerId{2}, "B", "B"));
 
     service.refresh(state);
-    state.note_selected = 0;
+    state.selection.note_selected = 0;
     state.mode = notes::tui::Mode::ConfirmDeleteNote;
 
     service.delete_selected(state);

@@ -18,7 +18,7 @@ public:
         using namespace ftxui;
         Element detail;
 
-        if (state.tab == 0) {
+        if (state.selection.tab == 0) {
             detail = render_note_detail(state);
             return vbox({
                 visual::app_title(),
@@ -34,6 +34,7 @@ public:
                     detail | flex,
                 }) | flex,
                 separator(),
+                visual::status_bar(state.status_message),
                 visual::help_footer(),
             });
         }
@@ -53,6 +54,7 @@ public:
                 detail | flex,
             }) | flex,
             separator(),
+            visual::status_bar(state.status_message),
             visual::help_footer(),
         });
     }
@@ -64,7 +66,7 @@ private:
             return visual::empty_state("No notes found.", "Press 'a' to add a note.");
         }
 
-        int idx = std::clamp(state.note_selected, 0, (int)state.notes.size() - 1);
+        int idx = std::clamp(state.selection.note_selected, 0, (int)state.notes.size() - 1);
         const auto& note = state.notes[idx];
         return vbox({
             text(note.title()) | bold,
@@ -81,7 +83,7 @@ private:
             return visual::empty_state("No reminders found.", "Press 'a' to add a reminder.");
         }
 
-        int idx = std::clamp(state.reminder_selected, 0, (int)state.reminders.size() - 1);
+        int idx = std::clamp(state.selection.reminder_selected, 0, (int)state.reminders.size() - 1);
         const auto& reminder = state.reminders[idx];
         return vbox({
             text(reminder.title()) | bold,

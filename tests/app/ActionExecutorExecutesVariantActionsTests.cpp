@@ -101,13 +101,13 @@ TEST(ActionExecutorTests, PassToNoteMenuActionForwardsToNoteSinkOnly) {
 
 TEST(ActionExecutorTests, SwitchTabActionTogglesTabBetweenZeroAndOne) {
     ExecutorFixture fx;
-    fx.state.tab = 0;
+    fx.state.selection.tab = 0;
 
     EXPECT_TRUE(fx.execute(notes::tui::SwitchTabAction{}));
-    EXPECT_EQ(fx.state.tab, 1);
+    EXPECT_EQ(fx.state.selection.tab, 1);
 
     EXPECT_TRUE(fx.execute(notes::tui::SwitchTabAction{}));
-    EXPECT_EQ(fx.state.tab, 0);
+    EXPECT_EQ(fx.state.selection.tab, 0);
 }
 
 TEST(ActionExecutorTests, EnterBrowseModeActionResetsModeToBrowse) {
@@ -120,15 +120,15 @@ TEST(ActionExecutorTests, EnterBrowseModeActionResetsModeToBrowse) {
 
 TEST(ActionExecutorTests, BeginAddNoteActionClearsFormFieldsAndSetsMode) {
     ExecutorFixture fx;
-    fx.state.form_title = "old";
-    fx.state.form_content = "old";
-    fx.state.form_date = "2025-01-01";
+    fx.state.form.title = "old";
+    fx.state.form.content = "old";
+    fx.state.form.date = "2025-01-01";
 
     EXPECT_TRUE(fx.execute(notes::tui::BeginAddNoteAction{}));
     EXPECT_EQ(fx.state.mode, notes::tui::Mode::AddNote);
-    EXPECT_EQ(fx.state.form_title, "");
-    EXPECT_EQ(fx.state.form_content, "");
-    EXPECT_EQ(fx.state.form_date, "");
+    EXPECT_EQ(fx.state.form.title, "");
+    EXPECT_EQ(fx.state.form.content, "");
+    EXPECT_EQ(fx.state.form.date, "");
 }
 
 TEST(ActionExecutorTests, BeginEditNoteActionPopulatesFormFromSelectedNote) {
@@ -137,12 +137,12 @@ TEST(ActionExecutorTests, BeginEditNoteActionPopulatesFormFromSelectedNote) {
         notes::Note<notes::IntegerId>::CreateNew(notes::IntegerId{1}, "title-a", "content-a"));
     fx.state.notes.push_back(
         notes::Note<notes::IntegerId>::CreateNew(notes::IntegerId{2}, "title-b", "content-b"));
-    fx.state.note_selected = 1;
+    fx.state.selection.note_selected = 1;
 
     EXPECT_TRUE(fx.execute(notes::tui::BeginEditNoteAction{}));
     EXPECT_EQ(fx.state.mode, notes::tui::Mode::EditNote);
-    EXPECT_EQ(fx.state.form_title, "title-b");
-    EXPECT_EQ(fx.state.form_content, "content-b");
+    EXPECT_EQ(fx.state.form.title, "title-b");
+    EXPECT_EQ(fx.state.form.content, "content-b");
 }
 
 TEST(ActionExecutorTests, EnterConfirmDeleteNoteWithEmptyNotesIsNormalizedBackToBrowse) {

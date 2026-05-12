@@ -15,6 +15,14 @@ inline ftxui::Element help_footer() {
     return text("Tab switch  ↑/↓ navigate  a add  e edit  d delete  q quit") | dim | center;
 }
 
+inline ftxui::Element status_bar(const std::string& message) {
+    using namespace ftxui;
+    if (message.empty()) {
+        return text("");
+    }
+    return text(message) | color(Color::Red) | center;
+}
+
 inline ftxui::Element empty_state(const std::string& message, const std::string& hint) {
     using namespace ftxui;
     return vbox({
