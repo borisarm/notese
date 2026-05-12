@@ -1,0 +1,52 @@
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include "../../src/app/tui/ReminderWorkflowService.hpp"
+#include "../../src/app/tui/TuiState.hpp"
+#include "../../src/domain/include/IntegerId.hpp"
+#include "../../src/domain/include/Reminder.hpp"
+#include "../../src/infrastructure/include/InMemoryNoteRepository.hpp"
+
+namespace notes::tests {
+
+using IntReminderType = notes::Reminder<notes::IntegerId>;
+using IntReminderRepo = InMemoryNoteRepository<IntReminderType>;
+
+TEST(ReminderWorkflowServiceTests, SaveFormInAddModePersistsAndReturnsToBrowse) {
+    IntReminderRepo repo;
+    notes::tui::ReminderWorkflowService<IntReminderRepo> service(repo);
+    notes::tui::TuiState state;
+
+    state.mode = notes::tui::Mode::AddReminder;
+    state.form_title = "Pay rent";
+    state.form_content = "Tomorrow";
+    state.form_date = "2026-05-20";
+
+    service.save_form(state);
+
+    EXPECT_EQ(state.mode, notes::tui::Mode::Browse);
+    ASSERT_EQ(state.reminders.size(), 1u);
+    EXPECT_EQ(state.reminders[0].title(), "Pay rent");
+    ASSERT_EQ(state.reminder_entries.size(), 1u);
+}
+
+TEST(ReminderWorkflowServiceTests, DeleteSelectedRemovesCurrentReminder) {
+    IntReminderRepo repo;
+    notes::tui::ReminderWorkflowService<IntReminderRepo> service(repo);
+    notes::tui::TuiState state;
+
+    auto ts = std::chrono::system_clock::now();
+    repo.save(IntReminderType::CreateNew(notes::IntegerId{1}, "A", "A", ts));
+    repo.save(IntReminderType::CreateNew(notes::IntegerId{2}, "B", "B", ts));
+
+    service.refresh(state);
+    state.reminder_selected = 0;
+    state.mode = notes::tui::Mode::ConfirmDeleteReminder;
+
+    service.delete_selected(state);
+
+    EXPECT_EQ(state.mode, notes::tui::Mode::Browse);
+    ASSERT_EQ(state.reminders.size(), 1u);
+}
+
+} // namespace notes::tests

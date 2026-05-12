@@ -5,6 +5,9 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+#include <functional>
+#include <format>
+#include <unordered_map>
 #include "Note.hpp"
 #include "Reminder.hpp"
 #include "IntegerId.hpp"
@@ -67,23 +70,25 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
 
     const auto& cmd = args[0];
 
-    // --- Notes ---
+    using CommandHandler = std::function<int(const std::vector<std::string>&)>;
+    std::unordered_map<std::string, CommandHandler> commands;
 
-    if (cmd == "list") {
+    commands.emplace("list", [&](const std::vector<std::string>& command_args) -> int {
+        (void)command_args;
         for (const auto& note : note_repo.list()) {
             std::cout << note.id().to_string() << "\t" << note.title() << "\n";
         }
         return 0;
-    }
+    });
 
-    if (cmd == "show") {
-        if (args.size() < 2) {
+    commands.emplace("show", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 2) {
             std::cerr << "Error: 'show' requires an id\n";
             return 1;
         }
-        auto note = note_repo.get(IntegerId{std::stoi(args[1])});
+        auto note = note_repo.get(IntegerId{std::stoi(command_args[1])});
         if (!note) {
-            std::cerr << "Error: note '" << args[1] << "' not found\n";
+            std::cerr << "Error: note '" << command_args[1] << "' not found\n";
             return 1;
         }
         std::cout << "Id:      " << note->id().to_string() << "\n"
@@ -92,10 +97,10 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
                   << "Updated: " << std::format("{:%FT%TZ}", note->updated_at()) << "\n"
                   << "\n" << note->content() << "\n";
         return 0;
-    }
+    });
 
-    if (cmd == "add") {
-        if (args.size() < 2) {
+    commands.emplace("add", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 2) {
             std::cerr << "Error: 'add' requires <title>\n";
             return 1;
         }
@@ -103,77 +108,76 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
         std::string content((std::istreambuf_iterator<char>(std::cin)),
                              std::istreambuf_iterator<char>());
         auto id = note_repo.next_id();
-        auto note = NoteType::CreateNew(id, args[1], std::move(content));
+        auto note = NoteType::CreateNew(id, command_args[1], std::move(content));
         note_repo.save(note);
         std::cout << "Added note '" << id.to_string() << "'\n";
         return 0;
-    }
+    });
 
-    if (cmd == "edit") {
-        if (args.size() < 3) {
+    commands.emplace("edit", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 3) {
             std::cerr << "Error: 'edit' requires <id> and <title>\n";
             return 1;
         }
-        auto existing = note_repo.get(IntegerId{std::stoi(args[1])});
+        auto existing = note_repo.get(IntegerId{std::stoi(command_args[1])});
         if (!existing) {
-            std::cerr << "Error: note '" << args[1] << "' not found\n";
+            std::cerr << "Error: note '" << command_args[1] << "' not found\n";
             return 1;
         }
         std::cerr << eof_hint << "\n";
         std::string content((std::istreambuf_iterator<char>(std::cin)),
                              std::istreambuf_iterator<char>());
-        auto updated = existing->with_updated_title(args[2])
+        auto updated = existing->with_updated_title(command_args[2])
                                 .with_updated_content(std::move(content));
         note_repo.save(updated);
-        std::cout << "Updated note '" << args[1] << "'\n";
+        std::cout << "Updated note '" << command_args[1] << "'\n";
         return 0;
-    }
+    });
 
-    if (cmd == "remove") {
-        if (args.size() < 2) {
+    commands.emplace("remove", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 2) {
             std::cerr << "Error: 'remove' requires an id\n";
             return 1;
         }
-        note_repo.remove(IntegerId{std::stoi(args[1])});
-        std::cout << "Removed note '" << args[1] << "'\n";
+        note_repo.remove(IntegerId{std::stoi(command_args[1])});
+        std::cout << "Removed note '" << command_args[1] << "'\n";
         return 0;
-    }
+    });
 
-    // --- Reminders ---
-
-    if (cmd == "remind") {
-        if (args.size() < 3) {
+    commands.emplace("remind", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 3) {
             std::cerr << "Error: 'remind' requires <title> and <date>\n";
             return 1;
         }
-        auto remind_at = parse_date(args[2]);
+        auto remind_at = parse_date(command_args[2]);
         std::cerr << eof_hint << "\n";
         std::string content((std::istreambuf_iterator<char>(std::cin)),
                              std::istreambuf_iterator<char>());
         auto id = reminder_repo.next_id();
-        auto reminder = ReminderType::CreateNew(id, args[1], std::move(content), remind_at);
+        auto reminder = ReminderType::CreateNew(id, command_args[1], std::move(content), remind_at);
         reminder_repo.save(reminder);
         std::cout << "Added reminder '" << id.to_string() << "'\n";
         return 0;
-    }
+    });
 
-    if (cmd == "reminders") {
+    commands.emplace("reminders", [&](const std::vector<std::string>& command_args) -> int {
+        (void)command_args;
         for (const auto& r : reminder_repo.list()) {
             std::cout << r.id().to_string() << "\t"
                       << std::format("{:%F}", r.remind_at()) << "\t"
                       << r.title() << "\n";
         }
         return 0;
-    }
+    });
 
-    if (cmd == "show-reminder") {
-        if (args.size() < 2) {
+    commands.emplace("show-reminder", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 2) {
             std::cerr << "Error: 'show-reminder' requires an id\n";
             return 1;
         }
-        auto r = reminder_repo.get(IntegerId{std::stoi(args[1])});
+        auto r = reminder_repo.get(IntegerId{std::stoi(command_args[1])});
         if (!r) {
-            std::cerr << "Error: reminder '" << args[1] << "' not found\n";
+            std::cerr << "Error: reminder '" << command_args[1] << "' not found\n";
             return 1;
         }
         std::cout << "Id:       " << r->id().to_string() << "\n"
@@ -183,38 +187,42 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
                   << "Updated:  " << std::format("{:%FT%TZ}", r->updated_at()) << "\n"
                   << "\n" << r->content() << "\n";
         return 0;
-    }
+    });
 
-    if (cmd == "edit-reminder") {
-        if (args.size() < 4) {
+    commands.emplace("edit-reminder", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 4) {
             std::cerr << "Error: 'edit-reminder' requires <id>, <title>, and <date>\n";
             return 1;
         }
-        auto existing = reminder_repo.get(IntegerId{std::stoi(args[1])});
+        auto existing = reminder_repo.get(IntegerId{std::stoi(command_args[1])});
         if (!existing) {
-            std::cerr << "Error: reminder '" << args[1] << "' not found\n";
+            std::cerr << "Error: reminder '" << command_args[1] << "' not found\n";
             return 1;
         }
-        auto remind_at = parse_date(args[3]);
+        auto remind_at = parse_date(command_args[3]);
         std::cerr << eof_hint << "\n";
         std::string content((std::istreambuf_iterator<char>(std::cin)),
                              std::istreambuf_iterator<char>());
-        auto updated = existing->with_updated_title(args[2])
+        auto updated = existing->with_updated_title(command_args[2])
                                 .with_updated_remind_at(remind_at)
                                 .with_updated_content(std::move(content));
         reminder_repo.save(updated);
-        std::cout << "Updated reminder '" << args[1] << "'\n";
+        std::cout << "Updated reminder '" << command_args[1] << "'\n";
         return 0;
-    }
+    });
 
-    if (cmd == "remove-reminder") {
-        if (args.size() < 2) {
+    commands.emplace("remove-reminder", [&](const std::vector<std::string>& command_args) -> int {
+        if (command_args.size() < 2) {
             std::cerr << "Error: 'remove-reminder' requires an id\n";
             return 1;
         }
-        reminder_repo.remove(IntegerId{std::stoi(args[1])});
-        std::cout << "Removed reminder '" << args[1] << "'\n";
+        reminder_repo.remove(IntegerId{std::stoi(command_args[1])});
+        std::cout << "Removed reminder '" << command_args[1] << "'\n";
         return 0;
+    });
+
+    if (auto it = commands.find(cmd); it != commands.end()) {
+        return it->second(args);
     }
 
     std::cerr << "Unknown command: " << cmd << "\n";
