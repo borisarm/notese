@@ -1,10 +1,10 @@
     #pragma once
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <chrono>
-#include <iomanip>
 #include <functional>
 #include <format>
 #include <unordered_map>
@@ -24,24 +24,27 @@ constexpr const char* eof_hint = "Enter content (Ctrl+Z then Enter to finish):";
 constexpr const char* eof_hint = "Enter content (Ctrl+D to finish):";
 #endif
 
-inline auto parse_date(const std::string& s) {
+inline std::chrono::system_clock::time_point parse_date(const std::string& s) {
     using Clock = std::chrono::system_clock;
-    using TimePoint = std::chrono::time_point<Clock>;
 
-    TimePoint tp{};
+    std::chrono::sys_seconds tp{};
     std::istringstream iss(s);
-    std::tm tm{};
-    iss >> std::get_time(&tm, "%Y-%m-%d");
+    std::chrono::from_stream(iss, "%Y-%m-%d", tp);
     if (iss.fail()) {
         iss.clear();
         iss.str(s);
-        iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
+        std::chrono::from_stream(iss, "%Y-%m-%dT%H:%M:%SZ", tp);
     }
-    if (!iss.fail()) {
-        auto sctp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
-        tp = std::chrono::time_point_cast<Clock::duration>(sctp);
+    if (iss.fail()) {
+        return Clock::time_point{};
     }
-    return tp;
+    return std::chrono::time_point_cast<Clock::duration>(tp);
+}
+
+inline std::string read_stdin_content() {
+    std::cerr << eof_hint << "\n";
+    return std::string((std::istreambuf_iterator<char>(std::cin)),
+                       std::istreambuf_iterator<char>());
 }
 
 inline void print_usage(const char* program) {
@@ -104,9 +107,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
             std::cerr << "Error: 'add' requires <title>\n";
             return 1;
         }
-        std::cerr << eof_hint << "\n";
-        std::string content((std::istreambuf_iterator<char>(std::cin)),
-                             std::istreambuf_iterator<char>());
+        std::string content = read_stdin_content();
         auto id = note_repo.next_id();
         auto note = NoteType::CreateNew(id, command_args[1], std::move(content));
         note_repo.save(note);
@@ -124,9 +125,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
             std::cerr << "Error: note '" << command_args[1] << "' not found\n";
             return 1;
         }
-        std::cerr << eof_hint << "\n";
-        std::string content((std::istreambuf_iterator<char>(std::cin)),
-                             std::istreambuf_iterator<char>());
+        std::string content = read_stdin_content();
         auto updated = existing->with_updated_title(command_args[2])
                                 .with_updated_content(std::move(content));
         note_repo.save(updated);
@@ -150,9 +149,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
             return 1;
         }
         auto remind_at = parse_date(command_args[2]);
-        std::cerr << eof_hint << "\n";
-        std::string content((std::istreambuf_iterator<char>(std::cin)),
-                             std::istreambuf_iterator<char>());
+        std::string content = read_stdin_content();
         auto id = reminder_repo.next_id();
         auto reminder = ReminderType::CreateNew(id, command_args[1], std::move(content), remind_at);
         reminder_repo.save(reminder);
@@ -200,9 +197,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
             return 1;
         }
         auto remind_at = parse_date(command_args[3]);
-        std::cerr << eof_hint << "\n";
-        std::string content((std::istreambuf_iterator<char>(std::cin)),
-                             std::istreambuf_iterator<char>());
+        std::string content = read_stdin_content();
         auto updated = existing->with_updated_title(command_args[2])
                                 .with_updated_remind_at(remind_at)
                                 .with_updated_content(std::move(content));
