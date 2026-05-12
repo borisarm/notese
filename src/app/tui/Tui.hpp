@@ -104,7 +104,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo) {
         // --- Form views ---
         if (mode == Mode::AddNote || mode == Mode::EditNote) {
             auto title = (mode == Mode::AddNote) ? "Add Note" : "Edit Note";
-            return vbox({
+            auto editor = vbox({
                 text(title) | bold | center,
                 separator(),
                 hbox(text("Title:   "), input_title->Render() | flex),
@@ -112,13 +112,23 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo) {
                 hbox(text("Content: "), input_content->Render() | flex),
                 filler(),
                 separator(),
-                text("Enter confirm  Escape cancel") | dim | center,
-            }) | border;
+                text("Enter confirm (except in content)  Escape cancel") | dim | center,
+            }) | border | flex;
+
+            auto preview = vbox({
+                text("Preview") | bold | center,
+                separator(),
+                text(form_title.empty() ? "(untitled)" : form_title) | bold,
+                separator(),
+                paragraph(form_content.empty() ? std::string("(empty)") : form_content) | flex,
+            }) | border | flex;
+
+            return hbox({editor, separator(), preview});
         }
 
         if (mode == Mode::AddReminder || mode == Mode::EditReminder) {
             auto title = (mode == Mode::AddReminder) ? "Add Reminder" : "Edit Reminder";
-            return vbox({
+            auto editor = vbox({
                 text(title) | bold | center,
                 separator(),
                 hbox(text("Title:   "), input_title->Render() | flex),
@@ -127,8 +137,19 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo) {
                 hbox(text("Content: "), input_content->Render() | flex),
                 filler(),
                 separator(),
-                text("Enter confirm  Escape cancel") | dim | center,
-            }) | border;
+                text("Enter confirm (except in content)  Escape cancel") | dim | center,
+            }) | border | flex;
+
+            auto preview = vbox({
+                text("Preview") | bold | center,
+                separator(),
+                text(form_title.empty() ? "(untitled)" : form_title) | bold,
+                text(form_date.empty() ? "(no date)" : ("date: " + form_date)) | dim,
+                separator(),
+                paragraph(form_content.empty() ? std::string("(empty)") : form_content) | flex,
+            }) | border | flex;
+
+            return hbox({editor, separator(), preview});
         }
 
         if (mode == Mode::ConfirmDeleteNote) {
@@ -244,6 +265,10 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo) {
                 return true;
             }
             if (event == Event::Return) {
+                if (input_content->Focused()) {
+                    // Let the content input consume Enter as a newline.
+                    return false;
+                }
                 if (!form_title.empty()) {
                     if (mode == Mode::AddNote) {
                         auto id = note_repo.next_id();
@@ -271,6 +296,10 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo) {
                 return true;
             }
             if (event == Event::Return) {
+                if (input_content->Focused()) {
+                    // Let the content input consume Enter as a newline.
+                    return false;
+                }
                 if (!form_title.empty() && !form_date.empty()) {
                     auto remind_at = parse_date(form_date);
                     if (mode == Mode::AddReminder) {
