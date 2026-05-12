@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <format>
-#include <ftxui/component/component.hpp>
+#include <functional>
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <variant>
@@ -19,6 +19,8 @@ struct overload : Func... {
 template <typename... Func>
 overload(Func...) -> overload<Func...>;
 
+using EventSink = std::function<bool(const ftxui::Event&)>;
+
 class ActionExecutor {
 public:
     template <typename NoteWorkflow, typename ReminderWorkflow>
@@ -28,8 +30,8 @@ public:
                  TuiState& state,
                  NoteWorkflow& note_workflow,
                  ReminderWorkflow& reminder_workflow,
-                 const ftxui::Component& note_menu,
-                 const ftxui::Component& reminder_menu) const {
+                 const EventSink& note_event_sink,
+                 const EventSink& reminder_event_sink) const {
         if (!decision.handled) {
             return false;
         }
@@ -57,10 +59,10 @@ public:
                 return true;
             },
             [&](PassToNoteMenuAction) -> bool {
-                return note_menu->OnEvent(event);
+                return note_event_sink(event);
             },
             [&](PassToReminderMenuAction) -> bool {
-                return reminder_menu->OnEvent(event);
+                return reminder_event_sink(event);
             },
             [&](EnterBrowseModeAction) -> bool {
                 state.mode = Mode::Browse;
@@ -115,7 +117,9 @@ public:
             },
         };
 
-        return std::visit(visitor, decision.action);
+        const bool handled = std::visit(visitor, decision.action);
+        state.enforce_invariants();
+        return handled;
     }
 };
 

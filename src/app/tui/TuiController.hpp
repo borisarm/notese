@@ -37,7 +37,6 @@ public:
                 components_.reminder_menu,
             },
             [&]() -> ftxui::Element {
-                state_.enforce_invariants();
                 return view_router_.render(
                     state_,
                     components_.input_title,
@@ -70,8 +69,8 @@ private:
             state_,
             note_workflow_,
             reminder_workflow_,
-            components_.note_menu,
-            components_.reminder_menu);
+            [this](const ftxui::Event& e) { return components_.note_menu->OnEvent(e); },
+            [this](const ftxui::Event& e) { return components_.reminder_menu->OnEvent(e); });
     }
 };
 
