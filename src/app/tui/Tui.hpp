@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <iomanip>
 #include "Note.hpp"
 #include "Reminder.hpp"
 #include "IntegerId.hpp"
@@ -24,7 +26,12 @@ inline auto parse_date(const std::string& s) {
     using TimePoint = std::chrono::time_point<Clock>;
     TimePoint tp{};
     std::istringstream iss(s);
-    iss >> std::chrono::parse("%F", tp);
+    std::tm tm{};
+    iss >> std::get_time(&tm, "%Y-%m-%d");
+    if (!iss.fail()) {
+        auto sctp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+        tp = std::chrono::time_point_cast<Clock::duration>(sctp);
+    }
     return tp;
 }
 
