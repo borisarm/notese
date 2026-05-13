@@ -26,7 +26,11 @@ add_executable(infrastructure_tests
 	MarkdownReminderRepositoryRemoveDeletesFileTests.cpp
 	MarkdownReminderRepositoryListReturnsAllSavedRemindersTests.cpp
 	MarkdownReminderRepositoryNextIdReturnsOneForEmptyDirectoryTests.cpp
-	MarkdownReminderRepositoryNextIdReturnsMaxPlusOneAfterSavesTests.cpp)
+	MarkdownReminderRepositoryNextIdReturnsMaxPlusOneAfterSavesTests.cpp
+	Iso8601EdgeCasesTests.cpp
+	NextIdAllocatorIgnoresNonIntegerStemTests.cpp
+	FileWriterErrorPathTests.cpp
+	FrontMatterMissingAndMalformedTests.cpp)
 
 target_include_directories(infrastructure_tests PRIVATE
 	${CMAKE_SOURCE_DIR}/src/infrastructure/include

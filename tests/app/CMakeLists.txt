@@ -1,12 +1,18 @@
 add_executable(app_tests
 	NavigationServiceProducesExpectedActionsTests.cpp
+	NavigationServiceCoversAllBranchesTests.cpp
 	ActionExecutorExecutesVariantActionsTests.cpp
+	ActionExecutorCoversRemainingVariantsTests.cpp
 	NoteWorkflowServicePersistsAndRefreshesStateTests.cpp
 	ReminderWorkflowServicePersistsAndRefreshesStateTests.cpp
+	WorkflowServicesEditPathAndErrorsTests.cpp
 	ViewRouterHandlesConfirmEmptyStateTests.cpp
-	TuiStateEnforceInvariantsTests.cpp)
+	TuiStateEnforceInvariantsTests.cpp
+	RenderViewsForAllModesTests.cpp
+	CliRunHandlesAllCommandsTests.cpp)
 
 target_include_directories(app_tests PRIVATE
+	${CMAKE_SOURCE_DIR}/src/app/cli
 	${CMAKE_SOURCE_DIR}/src/app/tui
 	${CMAKE_SOURCE_DIR}/src/domain/include
 	${CMAKE_SOURCE_DIR}/src/infrastructure/include)
