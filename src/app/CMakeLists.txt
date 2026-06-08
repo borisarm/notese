@@ -21,5 +21,11 @@ endif()
 
 target_compile_options(notese PRIVATE
     $<$<CONFIG:Release>:-Os -ffunction-sections -fdata-sections>)
-target_link_options(notese PRIVATE
-    $<$<CONFIG:Release>:-Wl,--gc-sections -s>)
+
+if(APPLE)
+    target_link_options(notese PRIVATE
+        $<$<CONFIG:Release>:-Wl,-dead_strip>)
+else()
+    target_link_options(notese PRIVATE
+        $<$<CONFIG:Release>:-Wl,--gc-sections>)
+endif()

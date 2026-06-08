@@ -42,11 +42,19 @@ inline std::chrono::system_clock::time_point parse_date(const std::string& s) {
         return Clock::time_point{};
     }
 
-    const std::time_t t = std::mktime(&tm);
-    if (t == static_cast<std::time_t>(-1)) {
+    using namespace std::chrono;
+    const auto ymd = year{tm.tm_year + 1900} /
+                     month{static_cast<unsigned>(tm.tm_mon + 1)} /
+                     day{static_cast<unsigned>(tm.tm_mday)};
+    if (!ymd.ok()) {
         return Clock::time_point{};
     }
-    return Clock::from_time_t(t);
+
+    const auto utc = sys_days{ymd} +
+                     hours{tm.tm_hour} +
+                     minutes{tm.tm_min} +
+                     seconds{tm.tm_sec};
+    return time_point_cast<Clock::duration>(utc);
 }
 
 inline std::string read_stdin_content() {
