@@ -16,6 +16,7 @@ find_package(ftxui CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
 enable_testing()
+include(CTest)
 
 add_subdirectory(src)
 add_subdirectory(tests)

@@ -29,22 +29,28 @@ protected:
     std::ostringstream err;
     std::istringstream in;
 
-    std::streambuf* prev_cout = nullptr;
-    std::streambuf* prev_cerr = nullptr;
-    std::streambuf* prev_cin = nullptr;
+    std::streambuf* original_cout = nullptr;
+    std::streambuf* original_cerr = nullptr;
+    std::streambuf* original_cin = nullptr;
+
+    void SetUp() override {
+        original_cout = std::cout.rdbuf();
+        original_cerr = std::cerr.rdbuf();
+        original_cin = std::cin.rdbuf();
+    }
 
     void redirect(const std::string& stdin_content = "") {
         in.str(stdin_content);
         in.clear();
-        prev_cout = std::cout.rdbuf(out.rdbuf());
-        prev_cerr = std::cerr.rdbuf(err.rdbuf());
-        prev_cin = std::cin.rdbuf(in.rdbuf());
+        std::cout.rdbuf(out.rdbuf());
+        std::cerr.rdbuf(err.rdbuf());
+        std::cin.rdbuf(in.rdbuf());
     }
 
     void TearDown() override {
-        if (prev_cout) std::cout.rdbuf(prev_cout);
-        if (prev_cerr) std::cerr.rdbuf(prev_cerr);
-        if (prev_cin) std::cin.rdbuf(prev_cin);
+        if (original_cout) std::cout.rdbuf(original_cout);
+        if (original_cerr) std::cerr.rdbuf(original_cerr);
+        if (original_cin) std::cin.rdbuf(original_cin);
     }
 
     int run(std::vector<std::string> args, const std::string& stdin_content = "") {
