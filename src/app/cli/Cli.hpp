@@ -6,12 +6,13 @@
 #include <sstream>
 #include <chrono>
 #include <functional>
-#include <format>
+#include <iomanip>
 #include <unordered_map>
 #include "Note.hpp"
 #include "Reminder.hpp"
 #include "IntegerId.hpp"
 #include "NoteRepositoryConcept.hpp"
+#include "Iso8601.hpp"
 
 namespace notes::cli {
 
@@ -27,18 +28,25 @@ constexpr const char* eof_hint = "Enter content (Ctrl+D to finish):";
 inline std::chrono::system_clock::time_point parse_date(const std::string& s) {
     using Clock = std::chrono::system_clock;
 
-    std::chrono::sys_seconds tp{};
+    Clock::time_point tp{};
     std::istringstream iss(s);
-    std::chrono::from_stream(iss, "%Y-%m-%d", tp);
+    std::tm tm{};
+    iss >> std::get_time(&tm, "%Y-%m-%d");
     if (iss.fail()) {
         iss.clear();
         iss.str(s);
-        std::chrono::from_stream(iss, "%Y-%m-%dT%H:%M:%SZ", tp);
+        tm = {};
+        iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
     }
     if (iss.fail()) {
         return Clock::time_point{};
     }
-    return std::chrono::time_point_cast<Clock::duration>(tp);
+
+    const std::time_t t = std::mktime(&tm);
+    if (t == static_cast<std::time_t>(-1)) {
+        return Clock::time_point{};
+    }
+    return Clock::from_time_t(t);
 }
 
 inline std::string read_stdin_content() {
@@ -96,8 +104,8 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
         }
         std::cout << "Id:      " << note->id().to_string() << "\n"
                   << "Title:   " << note->title() << "\n"
-                  << "Created: " << std::format("{:%FT%TZ}", note->created_at()) << "\n"
-                  << "Updated: " << std::format("{:%FT%TZ}", note->updated_at()) << "\n"
+                  << "Created: " << infra::to_iso8601(note->created_at()) << "\n"
+                  << "Updated: " << infra::to_iso8601(note->updated_at()) << "\n"
                   << "\n" << note->content() << "\n";
         return 0;
     });
@@ -161,7 +169,7 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
         (void)command_args;
         for (const auto& r : reminder_repo.list()) {
             std::cout << r.id().to_string() << "\t"
-                      << std::format("{:%F}", r.remind_at()) << "\t"
+                      << infra::to_utc_date(r.remind_at()) << "\t"
                       << r.title() << "\n";
         }
         return 0;
@@ -179,9 +187,9 @@ int run(NoteRepo& note_repo, ReminderRepo& reminder_repo, const std::vector<std:
         }
         std::cout << "Id:       " << r->id().to_string() << "\n"
                   << "Title:    " << r->title() << "\n"
-                  << "Remind:   " << std::format("{:%F}", r->remind_at()) << "\n"
-                  << "Created:  " << std::format("{:%FT%TZ}", r->created_at()) << "\n"
-                  << "Updated:  " << std::format("{:%FT%TZ}", r->updated_at()) << "\n"
+                  << "Remind:   " << infra::to_utc_date(r->remind_at()) << "\n"
+                  << "Created:  " << infra::to_iso8601(r->created_at()) << "\n"
+                  << "Updated:  " << infra::to_iso8601(r->updated_at()) << "\n"
                   << "\n" << r->content() << "\n";
         return 0;
     });

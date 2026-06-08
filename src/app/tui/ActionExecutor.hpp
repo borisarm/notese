@@ -1,11 +1,11 @@
 #pragma once
 
 #include <algorithm>
-#include <format>
 #include <functional>
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <variant>
+#include "Iso8601.hpp"
 #include "NavigationService.hpp"
 #include "TuiState.hpp"
 
@@ -99,7 +99,7 @@ public:
                 int idx = std::clamp(state.selection.reminder_selected, 0, (int)state.reminders.size() - 1);
                 state.form.title = state.reminders[idx].title();
                 state.form.content = state.reminders[idx].content();
-                state.form.date = std::format("{:%F}", state.reminders[idx].remind_at());
+                state.form.date = infra::to_utc_date(state.reminders[idx].remind_at());
                 state.mode = Mode::EditReminder;
                 return true;
             },

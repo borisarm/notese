@@ -3,16 +3,52 @@
 #include <charconv>
 #include <chrono>
 #include <cstddef>
-#include <format>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
 
 namespace notes::infra {
 
+namespace detail {
+
+inline std::tm utc_tm_from_time_t(std::time_t time_value) {
+    std::tm tm{};
+#ifdef _WIN32
+    gmtime_s(&tm, &time_value);
+#else
+    gmtime_r(&time_value, &tm);
+#endif
+    return tm;
+}
+
+template <typename TimePoint>
+inline std::string format_utc(TimePoint tp, const char* pattern) {
+    const std::time_t t = TimePoint::clock::to_time_t(tp);
+    const std::tm tm = utc_tm_from_time_t(t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, pattern);
+    return oss.str();
+}
+
+} // namespace detail
+
 template <typename TimePoint>
 inline std::string to_iso8601(TimePoint tp) {
-    return std::format("{:%FT%TZ}", tp);
+    return detail::format_utc(tp, "%Y-%m-%dT%H:%M:%SZ");
+}
+
+template <typename TimePoint>
+inline std::string to_utc_date(TimePoint tp) {
+    return detail::format_utc(tp, "%Y-%m-%d");
+}
+
+template <typename TimePoint>
+inline std::string to_utc_datetime(TimePoint tp) {
+    return detail::format_utc(tp, "%Y-%m-%d %H:%M:%S");
 }
 
 template <typename TimePoint>

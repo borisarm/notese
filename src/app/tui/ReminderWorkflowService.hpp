@@ -1,9 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include <format>
 #include "DateInputParser.hpp"
 #include "FileWriter.hpp"
+#include "Iso8601.hpp"
 #include "NoteRepositoryConcept.hpp"
 #include "TuiState.hpp"
 
@@ -24,7 +24,7 @@ public:
         state.reminder_entries.clear();
         for (const auto& reminder : state.reminders) {
             state.reminder_entries.push_back(
-                reminder.id().to_string() + "  " + std::format("{:%F}", reminder.remind_at()) + "  " + reminder.title());
+                reminder.id().to_string() + "  " + infra::to_utc_date(reminder.remind_at()) + "  " + reminder.title());
         }
 
         if (state.selection.reminder_selected >= (int)state.reminders.size()) {

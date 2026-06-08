@@ -1,9 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include <format>
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
+#include "Iso8601.hpp"
 #include "MarkdownPreview.hpp"
 #include "TuiState.hpp"
 #include "VisualComponents.hpp"
@@ -71,7 +71,7 @@ private:
         return vbox({
             text(note.title()) | bold,
             text("id: " + note.id().to_string()) | dim,
-            text("updated: " + std::format("{:%F %T}", note.updated_at())) | dim,
+            text("updated: " + infra::to_utc_datetime(note.updated_at())) | dim,
             separator(),
             render_markdown_preview(note.content()) | flex,
         }) | flex;
@@ -88,8 +88,8 @@ private:
         return vbox({
             text(reminder.title()) | bold,
             text("id: " + reminder.id().to_string()) | dim,
-            text("remind: " + std::format("{:%F}", reminder.remind_at())) | dim,
-            text("updated: " + std::format("{:%F %T}", reminder.updated_at())) | dim,
+            text("remind: " + infra::to_utc_date(reminder.remind_at())) | dim,
+            text("updated: " + infra::to_utc_datetime(reminder.updated_at())) | dim,
             separator(),
             render_markdown_preview(reminder.content()) | flex,
         }) | flex;
