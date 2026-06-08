@@ -38,7 +38,31 @@ inline std::string format_utc(TimePoint tp, const char* pattern) {
 
 template <typename TimePoint>
 inline std::string to_iso8601(TimePoint tp) {
-    return detail::format_utc(tp, "%Y-%m-%dT%H:%M:%SZ");
+    using namespace std::chrono;
+
+    const auto since_epoch = tp.time_since_epoch();
+    const auto whole_seconds = floor<seconds>(since_epoch);
+    auto fractional = duration_cast<nanoseconds>(since_epoch - whole_seconds);
+    if (fractional < nanoseconds{0}) {
+        fractional += seconds{1};
+    }
+
+    std::string out = detail::format_utc(TimePoint{whole_seconds}, "%Y-%m-%dT%H:%M:%S");
+    if (fractional.count() != 0) {
+        long long value = fractional.count();
+        int width = 9;
+        while (width > 1 && (value % 10) == 0) {
+            value /= 10;
+            --width;
+        }
+
+        std::ostringstream frac;
+        frac << std::setw(width) << std::setfill('0') << value;
+        out.push_back('.');
+        out += frac.str();
+    }
+    out.push_back('Z');
+    return out;
 }
 
 template <typename TimePoint>
